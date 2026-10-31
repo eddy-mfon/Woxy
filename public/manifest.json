@@ -1,0 +1,17 @@
+{
+  "name": "Woxy - Voice Journal",
+  "short_name": "Woxy",
+  "description": "Minimalist offline audio journal to capture daily voice notes.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#6366f1",
+  "icons": [
+    {
+      "src": "/logot.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
