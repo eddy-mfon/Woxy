@@ -38,6 +38,7 @@ import { OnboardingModal } from './OnboardingModal';
 import { WallpaperModal } from './WallpaperModal';
 import { InstallDesktopModal } from './InstallDesktopModal';
 import { ContributionHeatmap } from './ContributionHeatmap';
+import { Analytics } from '@vercel/analytics/react';
 import './App.css';
 
 type ActivePage = 'home' | 'calendar' | 'tags' | 'settings';
@@ -902,6 +903,7 @@ export function App() {
           <span className="mobile-nav-text">Settings</span>
         </button>
       </nav>
+      <Analytics />
     </div>
   );
 }
