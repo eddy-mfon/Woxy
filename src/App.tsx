@@ -15,6 +15,7 @@ import {
   Download,
   Upload,
 } from 'lucide-react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import type { VoiceNote, StreakStats } from './types';
 import {
   getAllVoiceNotes,
@@ -902,6 +903,7 @@ export function App() {
           <span className="mobile-nav-text">Settings</span>
         </button>
       </nav>
+      <SpeedInsights />
     </div>
   );
 }
