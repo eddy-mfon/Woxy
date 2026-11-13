@@ -5,6 +5,7 @@ export interface VoiceNoteMeta {
   duration: number; // Duration in seconds
   title: string;
   notes?: string;
+  transcript?: string;
   tags?: string[];
   audioSize?: number;
 }

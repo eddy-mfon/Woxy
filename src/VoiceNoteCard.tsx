@@ -9,17 +9,23 @@ import {
   Check,
   Loader2,
   Clock,
+  FileText,
+  Sparkles,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import type { VoiceNote } from './types';
 import { formatDuration, formatTime } from './utils';
 import { WaveformVisualizer } from './WaveformVisualizer';
 import { getVoiceNoteAudio } from './db';
+import { TranscribeModal } from './TranscribeModal';
 
 interface VoiceNoteCardProps {
   note: VoiceNote;
   authorName?: string;
   onDelete: (id: string) => Promise<void>;
   onUpdateTitle?: (id: string, newTitle: string) => Promise<void>;
+  onUpdateTranscript?: (id: string, transcript: string) => Promise<void>;
 }
 
 /** Check if a title is a default auto-generated one like "Voice Note #3" */
@@ -31,6 +37,7 @@ export const VoiceNoteCard: React.FC<VoiceNoteCardProps> = ({
   note,
   onDelete,
   onUpdateTitle,
+  onUpdateTranscript,
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -40,25 +47,29 @@ export const VoiceNoteCard: React.FC<VoiceNoteCardProps> = ({
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [title, setTitle] = useState(note.title);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isTranscribeModalOpen, setIsTranscribeModalOpen] = useState(false);
+  const [isTranscriptExpanded, setIsTranscriptExpanded] = useState(false);
+  const [cachedBlob, setCachedBlob] = useState<Blob | undefined>(note.audioBlob);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
   const hasCustomTitle = !isDefaultTitle(note.title) && note.title.trim().length > 0;
 
-  // Lazy load audio blob on-demand only when user plays or downloads
-  const loadAudioBlob = async (): Promise<string | null> => {
-    if (audioUrl) return audioUrl;
+  // Lazy load audio blob on-demand only when user plays, downloads, or transcribes
+  const loadAudioBlob = async (): Promise<{ url: string; blob: Blob } | null> => {
+    if (audioUrl && cachedBlob) return { url: audioUrl, blob: cachedBlob };
     setIsLoadingAudio(true);
     try {
-      let blob = note.audioBlob;
+      let blob = cachedBlob || note.audioBlob;
       if (!blob) {
         blob = (await getVoiceNoteAudio(note.id)) || undefined;
       }
       if (blob) {
-        const url = URL.createObjectURL(blob);
+        setCachedBlob(blob);
+        const url = audioUrl || URL.createObjectURL(blob);
         setAudioUrl(url);
-        return url;
+        return { url, blob };
       }
     } catch (err) {
       console.error('Error fetching audio blob:', err);
@@ -93,8 +104,8 @@ export const VoiceNoteCard: React.FC<VoiceNoteCardProps> = ({
 
   const togglePlay = async () => {
     if (!audioUrl) {
-      const loadedUrl = await loadAudioBlob();
-      if (!loadedUrl) return;
+      const loaded = await loadAudioBlob();
+      if (!loaded) return;
       setTimeout(() => {
         if (audioRef.current) {
           audioRef.current.play().catch((e) => console.error('Audio play error:', e));
@@ -147,7 +158,8 @@ export const VoiceNoteCard: React.FC<VoiceNoteCardProps> = ({
   const downloadAudio = async () => {
     let url = audioUrl;
     if (!url) {
-      url = (await loadAudioBlob()) || '';
+      const loaded = await loadAudioBlob();
+      url = loaded?.url || '';
     }
     if (!url) return;
 
@@ -159,6 +171,14 @@ export const VoiceNoteCard: React.FC<VoiceNoteCardProps> = ({
     a.click();
     document.body.removeChild(a);
     setMenuOpen(false);
+  };
+
+  const handleOpenTranscribe = async () => {
+    setMenuOpen(false);
+    if (!cachedBlob) {
+      await loadAudioBlob();
+    }
+    setIsTranscribeModalOpen(true);
   };
 
   const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
@@ -241,6 +261,17 @@ export const VoiceNoteCard: React.FC<VoiceNoteCardProps> = ({
 
         {/* Three-dot Menu */}
         <div className="vnc-menu-wrap" ref={menuRef}>
+          {/* Quick Transcribe Button on Card Header */}
+          <button
+            type="button"
+            className={`vnc-quick-transcribe-btn ${note.transcript ? 'has-transcript' : ''}`}
+            onClick={handleOpenTranscribe}
+            title={note.transcript ? 'View Transcript' : 'Transcribe voice to text'}
+          >
+            <Sparkles size={13} />
+            <span>{note.transcript ? 'Transcript' : 'Transcribe'}</span>
+          </button>
+
           <button
             className="vnc-menu-btn"
             onClick={() => setMenuOpen((v) => !v)}
@@ -260,6 +291,10 @@ export const VoiceNoteCard: React.FC<VoiceNoteCardProps> = ({
               >
                 <Edit2 size={13} />
                 <span>{hasCustomTitle ? 'Rename' : 'Add Title'}</span>
+              </button>
+              <button className="vnc-dropdown-item" onClick={handleOpenTranscribe}>
+                <FileText size={13} />
+                <span>{note.transcript ? 'View / Edit Transcript' : 'Transcribe Audio'}</span>
               </button>
               <button className="vnc-dropdown-item" onClick={downloadAudio}>
                 <Download size={13} />
@@ -317,6 +352,45 @@ export const VoiceNoteCard: React.FC<VoiceNoteCardProps> = ({
           </div>
         </div>
       )}
+
+      {/* Transcript Collapsible Snippet on Card if transcribed */}
+      {note.transcript && (
+        <div className="vnc-transcript-preview-box">
+          <div
+            className="vnc-transcript-header"
+            onClick={() => setIsTranscriptExpanded((v) => !v)}
+          >
+            <div className="vnc-transcript-title-row">
+              <FileText size={13} className="text-accent" />
+              <span className="vnc-transcript-label">Transcript</span>
+            </div>
+            <button type="button" className="vnc-transcript-toggle-btn">
+              {isTranscriptExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+            </button>
+          </div>
+          <p
+            className={`vnc-transcript-text ${isTranscriptExpanded ? 'expanded' : 'collapsed'}`}
+            onClick={() => setIsTranscriptExpanded((v) => !v)}
+          >
+            {note.transcript}
+          </p>
+        </div>
+      )}
+
+      {/* Transcription Modal */}
+      <TranscribeModal
+        isOpen={isTranscribeModalOpen}
+        onClose={() => setIsTranscribeModalOpen(false)}
+        noteTitle={note.title}
+        noteDate={note.dateStr}
+        audioBlob={cachedBlob}
+        initialTranscript={note.transcript || ''}
+        onSaveTranscript={async (newTranscript) => {
+          if (onUpdateTranscript) {
+            await onUpdateTranscript(note.id, newTranscript);
+          }
+        }}
+      />
     </div>
   );
 };
