@@ -13,8 +13,11 @@ import {
   Sparkles,
   ChevronDown,
   ChevronUp,
+  Users,
+  BookOpen,
+  Lightbulb,
 } from 'lucide-react';
-import type { VoiceNote } from './types';
+import type { VoiceNote, NoteCategory } from './types';
 import { formatDuration, formatTime } from './utils';
 import { WaveformVisualizer } from './WaveformVisualizer';
 import { getVoiceNoteAudio } from './db';
@@ -26,11 +29,12 @@ interface VoiceNoteCardProps {
   onDelete: (id: string) => Promise<void>;
   onUpdateTitle?: (id: string, newTitle: string) => Promise<void>;
   onUpdateTranscript?: (id: string, transcript: string) => Promise<void>;
+  onUpdateNotes?: (id: string, notes: string) => Promise<void>;
 }
 
-/** Check if a title is a default auto-generated one like "Voice Note #3" */
+/** Check if a title is a default auto-generated one */
 function isDefaultTitle(title: string): boolean {
-  return /^Voice Note #\d+$/i.test(title.trim());
+  return /^(Voice Note|Meeting|Note|Idea) #\d+$/i.test(title.trim());
 }
 
 export const VoiceNoteCard: React.FC<VoiceNoteCardProps> = ({
@@ -38,6 +42,7 @@ export const VoiceNoteCard: React.FC<VoiceNoteCardProps> = ({
   onDelete,
   onUpdateTitle,
   onUpdateTranscript,
+  onUpdateNotes,
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -49,12 +54,16 @@ export const VoiceNoteCard: React.FC<VoiceNoteCardProps> = ({
   const [menuOpen, setMenuOpen] = useState(false);
   const [isTranscribeModalOpen, setIsTranscribeModalOpen] = useState(false);
   const [isTranscriptExpanded, setIsTranscriptExpanded] = useState(false);
+  const [isNotesExpanded, setIsNotesExpanded] = useState(false);
+  const [isEditingNotes, setIsEditingNotes] = useState(false);
+  const [notesContent, setNotesContent] = useState(note.notes || '');
   const [cachedBlob, setCachedBlob] = useState<Blob | undefined>(note.audioBlob);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
   const hasCustomTitle = !isDefaultTitle(note.title) && note.title.trim().length > 0;
+  const category: NoteCategory = note.category || 'journal';
 
   // Lazy load audio blob on-demand only when user plays, downloads, or transcribes
   const loadAudioBlob = async (): Promise<{ url: string; blob: Blob } | null> => {
@@ -155,6 +164,13 @@ export const VoiceNoteCard: React.FC<VoiceNoteCardProps> = ({
     }
   };
 
+  const handleNotesSubmit = async () => {
+    setIsEditingNotes(false);
+    if (onUpdateNotes) {
+      await onUpdateNotes(note.id, notesContent);
+    }
+  };
+
   const downloadAudio = async () => {
     let url = audioUrl;
     if (!url) {
@@ -165,7 +181,7 @@ export const VoiceNoteCard: React.FC<VoiceNoteCardProps> = ({
 
     const a = document.createElement('a');
     a.href = url;
-    const safeTitle = (note.title || 'voice-note').replace(/[^a-z0-9_-]/gi, '_');
+    const safeTitle = (note.title || 'audio-note').replace(/[^a-z0-9_-]/gi, '_');
     a.download = `${safeTitle}-${note.dateStr}.webm`;
     document.body.appendChild(a);
     a.click();
@@ -184,19 +200,21 @@ export const VoiceNoteCard: React.FC<VoiceNoteCardProps> = ({
   const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
-    <div className={`vnc-card ${isPlaying ? 'vnc-playing' : ''}`}>
-      <audio
-        ref={audioRef}
-        src={audioUrl}
-        onPlay={() => setIsPlaying(true)}
-        onPause={() => setIsPlaying(false)}
-        onEnded={() => {
-          setIsPlaying(false);
-          setCurrentTime(0);
-        }}
-        onTimeUpdate={handleTimeUpdate}
-        onLoadedMetadata={handleLoadedMetadata}
-      />
+    <div className={`vnc-card ${isPlaying ? 'vnc-playing' : ''} vnc-cat-${category}`}>
+      {audioUrl && (
+        <audio
+          ref={audioRef}
+          src={audioUrl}
+          onPlay={() => setIsPlaying(true)}
+          onPause={() => setIsPlaying(false)}
+          onEnded={() => {
+            setIsPlaying(false);
+            setCurrentTime(0);
+          }}
+          onTimeUpdate={handleTimeUpdate}
+          onLoadedMetadata={handleLoadedMetadata}
+        />
+      )}
 
       {/* Top Row: Play button + Info + Menu */}
       <div className="vnc-top-row">
@@ -216,10 +234,36 @@ export const VoiceNoteCard: React.FC<VoiceNoteCardProps> = ({
           )}
         </button>
 
-        {/* Center: Time + Duration + optional title */}
+        {/* Center: Time + Category Badge + Duration + Title */}
         <div className="vnc-info">
           <div className="vnc-primary-row">
             <span className="vnc-time">{formatTime(note.timestamp)}</span>
+
+            {/* Category Badge */}
+            <span className={`vnc-category-badge cat-${category}`}>
+              {category === 'meeting' ? (
+                <>
+                  <Users size={11} />
+                  <span>Meeting</span>
+                </>
+              ) : category === 'idea' ? (
+                <>
+                  <Lightbulb size={11} />
+                  <span>Idea</span>
+                </>
+              ) : category === 'note' ? (
+                <>
+                  <FileText size={11} />
+                  <span>Note</span>
+                </>
+              ) : (
+                <>
+                  <BookOpen size={11} />
+                  <span>Journal</span>
+                </>
+              )}
+            </span>
+
             <span className="vnc-duration-pill">
               <Clock size={11} />
               {formatDuration(duration)}
@@ -257,6 +301,16 @@ export const VoiceNoteCard: React.FC<VoiceNoteCardProps> = ({
               {note.title}
             </span>
           ) : null}
+
+          {/* Meeting Attendees if any */}
+          {note.attendees && note.attendees.length > 0 && (
+            <div className="vnc-attendees-strip">
+              <Users size={12} className="vnc-attendees-icon" />
+              <span className="vnc-attendees-text">
+                {note.attendees.join(', ')}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Three-dot Menu */}
@@ -297,20 +351,31 @@ export const VoiceNoteCard: React.FC<VoiceNoteCardProps> = ({
                 <Edit2 size={13} />
                 <span>{hasCustomTitle ? 'Rename' : 'Add Title'}</span>
               </button>
-              <button className="vnc-dropdown-item" onClick={handleOpenTranscribe}>
+              <button
+                className="vnc-dropdown-item"
+                onClick={() => {
+                  setIsEditingNotes(true);
+                  setIsNotesExpanded(true);
+                  setMenuOpen(false);
+                }}
+              >
                 <FileText size={13} />
+                <span>{note.notes ? 'Edit Notes' : 'Add Notes / Agenda'}</span>
+              </button>
+              <button className="vnc-dropdown-item" onClick={handleOpenTranscribe}>
+                <Sparkles size={13} />
                 <span>{note.transcript ? 'View / Edit Transcript' : 'Transcribe Audio'}</span>
               </button>
               <button className="vnc-dropdown-item" onClick={downloadAudio}>
                 <Download size={13} />
-                <span>Download</span>
+                <span>Download Audio</span>
               </button>
               <div className="vnc-dropdown-divider" />
               <button
                 className="vnc-dropdown-item danger"
                 onClick={() => {
                   setMenuOpen(false);
-                  if (confirm('Delete this voice note?')) {
+                  if (confirm('Delete this entry?')) {
                     onDelete(note.id);
                   }
                 }}
@@ -358,6 +423,66 @@ export const VoiceNoteCard: React.FC<VoiceNoteCardProps> = ({
         </div>
       )}
 
+      {/* Written Notes / Meeting Agenda Section */}
+      {(note.notes || isEditingNotes) && (
+        <div className="vnc-notes-section">
+          <div
+            className="vnc-notes-header"
+            onClick={() => setIsNotesExpanded((v) => !v)}
+          >
+            <div className="vnc-notes-title-row">
+              <FileText size={13} className="text-accent" />
+              <span className="vnc-notes-label">
+                {category === 'meeting' ? 'Meeting Notes & Agenda' : 'Written Notes'}
+              </span>
+            </div>
+            <button type="button" className="vnc-notes-toggle-btn">
+              {isNotesExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+            </button>
+          </div>
+
+          {isEditingNotes ? (
+            <div className="vnc-notes-editor-box">
+              <textarea
+                value={notesContent}
+                onChange={(e) => setNotesContent(e.target.value)}
+                className="vnc-notes-textarea"
+                rows={3}
+                placeholder="Type meeting notes, action items, or thoughts..."
+                autoFocus
+              />
+              <div className="vnc-notes-edit-actions">
+                <button
+                  type="button"
+                  className="btn-vnc-cancel-notes"
+                  onClick={() => {
+                    setNotesContent(note.notes || '');
+                    setIsEditingNotes(false);
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="btn-vnc-save-notes"
+                  onClick={handleNotesSubmit}
+                >
+                  <Check size={13} />
+                  <span>Save Notes</span>
+                </button>
+              </div>
+            </div>
+          ) : (
+            <p
+              className={`vnc-notes-content ${isNotesExpanded ? 'expanded' : 'collapsed'}`}
+              onClick={() => setIsNotesExpanded((v) => !v)}
+            >
+              {note.notes}
+            </p>
+          )}
+        </div>
+      )}
+
       {/* Transcript Collapsible Snippet on Card if transcribed */}
       {note.transcript && (
         <div className="vnc-transcript-preview-box">
@@ -366,7 +491,7 @@ export const VoiceNoteCard: React.FC<VoiceNoteCardProps> = ({
             onClick={() => setIsTranscriptExpanded((v) => !v)}
           >
             <div className="vnc-transcript-title-row">
-              <FileText size={13} className="text-accent" />
+              <Sparkles size={13} className="text-accent" />
               <span className="vnc-transcript-label">Transcript</span>
             </div>
             <button type="button" className="vnc-transcript-toggle-btn">

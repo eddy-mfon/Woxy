@@ -4556,3 +4556,503 @@ html, body, #root {
 .vnc-transcript-text.expanded {
   display: block;
 }
+
+
+/* =========================================================
+   WORKSPACE NOTES & MEETING RECORDING SUITE
+   Minimalist, clean, structured styles for meetings & notes
+   ========================================================= */
+
+/* Category tabbar in studio */
+.recorder-category-tabbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.25rem 0.25rem;
+  border-bottom: 1px solid var(--border-subtle);
+  overflow-x: auto;
+}
+
+.cat-pill-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 9999px;
+  border: 1px solid var(--border-subtle);
+  background-color: #ffffff;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.cat-pill-btn:hover {
+  background-color: var(--bg-surface-subtle);
+  color: var(--text-pure);
+  border-color: var(--border-strong);
+}
+
+.cat-pill-btn.is-selected {
+  background-color: var(--accent-purple-bg);
+  border-color: var(--accent-purple);
+  color: var(--accent-purple);
+  box-shadow: 0 0 0 1.5px var(--accent-purple);
+}
+
+/* Studio inputs */
+.studio-inputs-wrapper {
+  width: 100%;
+  max-width: 540px;
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.studio-title-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border-subtle);
+  background-color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-pure);
+  outline: none;
+  transition: all 0.15s ease;
+}
+
+.studio-title-input:focus {
+  border-color: var(--accent-purple);
+  box-shadow: 0 0 0 2px var(--accent-purple-bg);
+}
+
+.meeting-attendees-field {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #ffffff;
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 0.35rem 0.75rem;
+  transition: border-color 0.15s ease;
+}
+
+.meeting-attendees-field:focus-within {
+  border-color: var(--accent-purple);
+  box-shadow: 0 0 0 2px var(--accent-purple-bg);
+}
+
+.input-field-icon {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.studio-sub-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 0.84rem;
+  color: var(--text-pure);
+}
+
+.studio-notes-scratchpad {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  background-color: #ffffff;
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 0.6rem 0.75rem;
+}
+
+.studio-notes-scratchpad:focus-within {
+  border-color: var(--accent-purple);
+  box-shadow: 0 0 0 2px var(--accent-purple-bg);
+}
+
+.notes-icon {
+  margin-top: 0.25rem;
+}
+
+.studio-notes-textarea {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 0.85rem;
+  font-family: inherit;
+  color: var(--text-pure);
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.save-text-only-row {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-save-note-only {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.95rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background-color: #ffffff;
+  color: var(--accent-purple);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-save-note-only:hover {
+  background-color: var(--accent-purple-bg);
+  border-color: var(--accent-purple-light);
+}
+
+/* Live recorder notepad */
+.live-recorder-notepad {
+  width: 100%;
+  max-width: 540px;
+  background-color: #ffffff;
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.notepad-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.live-notepad-input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--text-pure);
+  font-family: inherit;
+  resize: vertical;
+}
+
+.preview-notes-wrap {
+  width: 100%;
+  background-color: #ffffff;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 0.65rem 0.85rem;
+}
+
+.preview-notes-textarea {
+  width: 100%;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--text-pure);
+  font-family: inherit;
+  resize: vertical;
+}
+
+/* Card badges & notes */
+.vnc-category-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+}
+
+.vnc-category-badge.cat-meeting {
+  background-color: rgba(99, 102, 241, 0.1);
+  color: #6366f1;
+}
+
+.vnc-category-badge.cat-journal {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.vnc-category-badge.cat-idea {
+  background-color: rgba(245, 158, 11, 0.1);
+  color: #d97706;
+}
+
+.vnc-category-badge.cat-note {
+  background-color: rgba(100, 116, 139, 0.1);
+  color: #475569;
+}
+
+.vnc-attendees-strip {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  margin-top: 0.2rem;
+}
+
+.vnc-attendees-text {
+  font-weight: 500;
+}
+
+.vnc-notes-section {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  border-radius: var(--radius-md);
+  background-color: #ffffff;
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.vnc-notes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+}
+
+.vnc-notes-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.vnc-notes-label {
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.vnc-notes-toggle-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.vnc-notes-content {
+  font-size: 0.83rem;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+  cursor: pointer;
+}
+
+.vnc-notes-content.collapsed {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.vnc-notes-editor-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.vnc-notes-textarea {
+  width: 100%;
+  padding: 0.6rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  font-size: 0.84rem;
+  font-family: inherit;
+  outline: none;
+  resize: vertical;
+}
+
+.vnc-notes-edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.btn-vnc-cancel-notes {
+  padding: 0.3rem 0.7rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  background-color: #ffffff;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.btn-vnc-save-notes {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: var(--radius-sm);
+  border: none;
+  background-color: var(--accent-purple);
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Feed category filters */
+.today-feed-header-flex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.feed-category-filters {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.feed-filter-btn {
+  padding: 0.32rem 0.75rem;
+  border-radius: 9999px;
+  border: 1px solid var(--border-subtle);
+  background-color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.feed-filter-btn:hover {
+  color: var(--text-pure);
+  border-color: var(--border-strong);
+}
+
+.feed-filter-btn.active {
+  background-color: var(--text-pure);
+  border-color: var(--text-pure);
+  color: #ffffff;
+}
+
+.empty-category-feed {
+  padding: 2.5rem 1rem;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  background-color: #ffffff;
+  border: 1px dashed var(--border-subtle);
+  border-radius: var(--radius-lg);
+}
+
+/* Meetings View */
+.meetings-view-flow {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.meetings-header-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.meetings-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.btn-new-meeting {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 1.15rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background-color: #ffffff;
+  color: var(--text-pure);
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-new-meeting:hover {
+  background-color: var(--accent-purple-bg);
+  border-color: var(--accent-purple);
+  color: var(--accent-purple);
+}
+
+.btn-new-meeting.primary {
+  background-color: var(--accent-purple);
+  border-color: var(--accent-purple);
+  color: #ffffff;
+  margin-top: 1rem;
+}
+
+.meetings-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3.5rem 1.5rem;
+  background-color: #ffffff;
+  border-radius: var(--radius-lg);
+  border: 1px dashed var(--border-subtle);
+  max-width: 500px;
+  margin: 2rem auto;
+}
+
+.empty-meeting-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-color: var(--accent-purple-bg);
+  color: var(--accent-purple);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.meetings-empty-state h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-pure);
+  margin-bottom: 0.4rem;
+}
+
+.meetings-empty-state p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}

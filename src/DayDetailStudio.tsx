@@ -1,6 +1,6 @@
 import React from 'react';
 import { ArrowLeft, Plus, Mic, Sparkles, Clock } from 'lucide-react';
-import type { VoiceNote } from './types';
+import type { VoiceNote, NoteCategory } from './types';
 import { getFriendlyDateLabel, formatDuration } from './utils';
 import { AudioRecorder } from './AudioRecorder';
 import { VoiceNoteCard } from './VoiceNoteCard';
@@ -9,10 +9,18 @@ interface DayDetailStudioProps {
   dateStr: string;
   notes: VoiceNote[];
   onBack: () => void;
-  onSaveRecord: (blob: Blob, duration: number, title?: string) => Promise<void>;
+  onSaveRecord: (
+    blob: Blob | undefined,
+    duration: number,
+    title?: string,
+    category?: NoteCategory,
+    notes?: string,
+    attendees?: string[]
+  ) => Promise<void>;
   onDeleteRecord: (id: string) => Promise<void>;
   onUpdateTitle: (id: string, newTitle: string) => Promise<void>;
   onUpdateTranscript?: (id: string, transcript: string) => Promise<void>;
+  onUpdateNotes?: (id: string, notes: string) => Promise<void>;
 }
 
 export const DayDetailStudio: React.FC<DayDetailStudioProps> = ({
@@ -23,6 +31,7 @@ export const DayDetailStudio: React.FC<DayDetailStudioProps> = ({
   onDeleteRecord,
   onUpdateTitle,
   onUpdateTranscript,
+  onUpdateNotes,
 }) => {
   const [showRecorder, setShowRecorder] = React.useState(notes.length === 0);
 
@@ -77,9 +86,7 @@ export const DayDetailStudio: React.FC<DayDetailStudioProps> = ({
       {showRecorder && (
         <div className="day-recorder-section">
           <AudioRecorder
-            onSaveRecord={async (blob, duration, title) => {
-              await onSaveRecord(blob, duration, title);
-            }}
+            onSaveRecord={onSaveRecord}
             selectedDateLabel={getFriendlyDateLabel(dateStr)}
           />
         </div>
@@ -113,6 +120,7 @@ export const DayDetailStudio: React.FC<DayDetailStudioProps> = ({
                 onDelete={onDeleteRecord}
                 onUpdateTitle={onUpdateTitle}
                 onUpdateTranscript={onUpdateTranscript}
+                onUpdateNotes={onUpdateNotes}
               />
             ))}
           </div>

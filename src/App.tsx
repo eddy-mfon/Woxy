@@ -14,8 +14,9 @@ import {
   Trash2,
   Download,
   Upload,
+  Users,
 } from 'lucide-react';
-import type { VoiceNote, StreakStats } from './types';
+import type { VoiceNote, StreakStats, NoteCategory } from './types';
 import {
   getAllVoiceNotes,
   saveVoiceNote,
@@ -40,7 +41,7 @@ import { InstallDesktopModal } from './InstallDesktopModal';
 import { ContributionHeatmap } from './ContributionHeatmap';
 import './App.css';
 
-type ActivePage = 'home' | 'calendar' | 'tags' | 'settings';
+type ActivePage = 'home' | 'calendar' | 'meetings' | 'tags' | 'settings';
 
 export function App() {
   const [activePage, setActivePage] = useState<ActivePage>('home');
@@ -50,6 +51,7 @@ export function App() {
   );
   const [_loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeCategoryFilter, setActiveCategoryFilter] = useState<'all' | NoteCategory>('all');
   const [userName, setUserName] = useState(
     () => localStorage.getItem('vj_user_name') || ''
   );
@@ -178,17 +180,27 @@ export function App() {
     return calculateStreaks(notes);
   }, [notes]);
 
-  // Notes for today's feed and search
+  // Notes for today's feed, category filters, and search
   const notesForToday = useMemo(() => {
-    const todayNotes = notes.filter((n) => n.dateStr === todayStr);
-    if (!searchQuery.trim()) return todayNotes;
+    let list = notes.filter((n) => n.dateStr === todayStr);
+    if (activeCategoryFilter !== 'all') {
+      list = list.filter((n) => (n.category || 'journal') === activeCategoryFilter);
+    }
+    if (!searchQuery.trim()) return list;
     const q = searchQuery.toLowerCase();
-    return todayNotes.filter(
+    return list.filter(
       (n) =>
         n.title.toLowerCase().includes(q) ||
-        (n.notes && n.notes.toLowerCase().includes(q))
+        (n.notes && n.notes.toLowerCase().includes(q)) ||
+        (n.transcript && n.transcript.toLowerCase().includes(q)) ||
+        (n.attendees && n.attendees.some((a) => a.toLowerCase().includes(q)))
     );
-  }, [notes, todayStr, searchQuery]);
+  }, [notes, todayStr, activeCategoryFilter, searchQuery]);
+
+  // All meetings across the app
+  const allMeetingNotes = useMemo(() => {
+    return notes.filter((n) => n.category === 'meeting');
+  }, [notes]);
 
   // Audio stats
   const totalSecondsRecorded = useMemo(() => {
@@ -197,23 +209,37 @@ export function App() {
 
   // Handlers
   const handleSaveRecord = async (
-    blob: Blob,
+    blob: Blob | undefined,
     duration: number,
-    customTitle?: string
+    customTitle?: string,
+    category: NoteCategory = 'journal',
+    notesText?: string,
+    attendees?: string[]
   ) => {
     const targetDate = openedDayStudioDate || selectedDate;
     const now = new Date();
     const currentNotesForDay = notes.filter((n) => n.dateStr === targetDate);
     const noteNumber = currentNotesForDay.length + 1;
 
-    const defaultTitle = `Voice Note #${noteNumber}`;
+    const defaultTitle =
+      category === 'meeting'
+        ? `Meeting #${noteNumber}`
+        : category === 'idea'
+        ? `Quick Idea #${noteNumber}`
+        : category === 'note'
+        ? `Note #${noteNumber}`
+        : `Voice Note #${noteNumber}`;
+
     const newNote: VoiceNote = {
       id: `vn_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
       dateStr: targetDate,
       timestamp: now.getTime(),
-      duration: Math.max(1, Math.round(duration)),
+      duration: Math.max(0, Math.round(duration)),
       audioBlob: blob,
       title: customTitle || defaultTitle,
+      category,
+      notes: notesText,
+      attendees,
     };
 
     await saveVoiceNote(newNote);
@@ -232,6 +258,11 @@ export function App() {
 
   const handleUpdateTranscript = async (id: string, newTranscript: string) => {
     await updateVoiceNote(id, { transcript: newTranscript });
+    await refreshNotes();
+  };
+
+  const handleUpdateNotes = async (id: string, notesText: string) => {
+    await updateVoiceNote(id, { notes: notesText });
     await refreshNotes();
   };
 
@@ -373,10 +404,10 @@ export function App() {
           </div>
         </div>
 
-        {/* Sidebar Nav: Home & Calendar centralized under Journal */}
+        {/* Sidebar Nav: Home, Meetings, & Calendar */}
         <div className="sidebar-scrollable-nav">
           <div className="nav-group journal-group">
-            <span className="nav-group-heading">JOURNAL</span>
+            <span className="nav-group-heading">WORKSPACE</span>
             <nav className="nav-group-list">
               <button
                 className={`nav-row-btn ${activePage === 'home' ? 'is-active' : ''}`}
@@ -384,10 +415,22 @@ export function App() {
                   setActivePage('home');
                   setOpenedDayStudioDate(null);
                 }}
-                title="Home Dashboard"
+                title="All Notes & Reflections"
               >
                 <Home size={19} className="nav-icon" />
-                <span className="nav-label">Home</span>
+                <span className="nav-label">All Notes</span>
+              </button>
+
+              <button
+                className={`nav-row-btn ${activePage === 'meetings' ? 'is-active' : ''}`}
+                onClick={() => {
+                  setActivePage('meetings');
+                  setOpenedDayStudioDate(null);
+                }}
+                title="Recorded Meetings & Discussion Notes"
+              >
+                <Users size={19} className="nav-icon" />
+                <span className="nav-label">Meetings ({allMeetingNotes.length})</span>
               </button>
 
               <button
@@ -618,15 +661,48 @@ export function App() {
                 }}
               />
 
-              {/* Today's Entries Feed */}
-              {notesForToday.length > 0 && (
-                <div className="today-feed-section">
-                  <div className="today-feed-header">
-                    <h3 className="today-feed-title">Today's Voice Notes</h3>
+              {/* Feed with Category Pills Header */}
+              <div className="today-feed-section">
+                <div className="today-feed-header-flex">
+                  <div>
+                    <h3 className="today-feed-title">
+                      {activeCategoryFilter === 'all'
+                        ? "Today's Notes & Recordings"
+                        : activeCategoryFilter === 'meeting'
+                        ? "Today's Meetings"
+                        : activeCategoryFilter === 'idea'
+                        ? "Today's Ideas"
+                        : "Today's Journal Entries"}
+                    </h3>
                     <span className="today-feed-count">
                       {notesForToday.length} {notesForToday.length === 1 ? 'entry' : 'entries'}
                     </span>
                   </div>
+
+                  {/* Filter Pills */}
+                  <div className="feed-category-filters">
+                    {(
+                      [
+                        { id: 'all', label: 'All' },
+                        { id: 'meeting', label: 'Meetings' },
+                        { id: 'journal', label: 'Journal' },
+                        { id: 'idea', label: 'Ideas' },
+                        { id: 'note', label: 'Notes' },
+                      ] as const
+                    ).map((f) => (
+                      <button
+                        key={f.id}
+                        type="button"
+                        className={`feed-filter-btn ${activeCategoryFilter === f.id ? 'active' : ''}`}
+                        onClick={() => setActiveCategoryFilter(f.id)}
+                      >
+                        {f.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {notesForToday.length > 0 ? (
                   <div className="ref-campaign-grid">
                     {notesForToday.map((note) => (
                       <VoiceNoteCard
@@ -636,9 +712,85 @@ export function App() {
                         onDelete={handleDeleteRecord}
                         onUpdateTitle={handleUpdateTitle}
                         onUpdateTranscript={handleUpdateTranscript}
+                        onUpdateNotes={handleUpdateNotes}
                       />
                     ))}
                   </div>
+                ) : (
+                  <div className="empty-category-feed">
+                    <p>No notes or recordings found in this view today.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Dedicated Meetings View */}
+          {activePage === 'meetings' && (
+            <div className="meetings-view-flow">
+              <div className="view-title-banner">
+                <div className="meetings-header-banner">
+                  <div className="meetings-title-group">
+                    <Users size={24} className="text-accent" />
+                    <div>
+                      <h2 className="view-main-heading">Meeting Recordings & Notes</h2>
+                      <p className="view-sub-heading">
+                        All your recorded meetings, agenda items, discussions, and action notes in one place.
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    className="btn-new-meeting"
+                    onClick={() => {
+                      setActivePage('home');
+                      setTimeout(() => {
+                        const el = document.getElementById('audio-recorder-chamber');
+                        if (el) el.scrollIntoView({ behavior: 'smooth' });
+                      }, 100);
+                    }}
+                  >
+                    <Mic size={15} />
+                    <span>Record New Meeting</span>
+                  </button>
+                </div>
+              </div>
+
+              {allMeetingNotes.length === 0 ? (
+                <div className="meetings-empty-state">
+                  <div className="empty-meeting-icon">
+                    <Users size={32} />
+                  </div>
+                  <h3>No recorded meetings yet</h3>
+                  <p>
+                    Select the "Meeting" tab in the recording studio above to capture team discussions, client calls, and standups.
+                  </p>
+                  <button
+                    className="btn-new-meeting primary"
+                    onClick={() => {
+                      setActivePage('home');
+                      setTimeout(() => {
+                        const el = document.getElementById('audio-recorder-chamber');
+                        if (el) el.scrollIntoView({ behavior: 'smooth' });
+                      }, 100);
+                    }}
+                  >
+                    <span>Start Your First Meeting Recording</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="ref-campaign-grid">
+                  {allMeetingNotes.map((note) => (
+                    <VoiceNoteCard
+                      key={note.id}
+                      note={note}
+                      authorName={userName}
+                      onDelete={handleDeleteRecord}
+                      onUpdateTitle={handleUpdateTitle}
+                      onUpdateTranscript={handleUpdateTranscript}
+                      onUpdateNotes={handleUpdateNotes}
+                    />
+                  ))}
                 </div>
               )}
             </div>
@@ -656,6 +808,7 @@ export function App() {
                   onDeleteRecord={handleDeleteRecord}
                   onUpdateTitle={handleUpdateTitle}
                   onUpdateTranscript={handleUpdateTranscript}
+                  onUpdateNotes={handleUpdateNotes}
                 />
               ) : (
                 <div className="calendar-view-container">

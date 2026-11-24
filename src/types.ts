@@ -1,3 +1,5 @@
+export type NoteCategory = 'journal' | 'meeting' | 'idea' | 'note';
+
 export interface VoiceNoteMeta {
   id: string;
   dateStr: string; // YYYY-MM-DD format (local date)
@@ -8,6 +10,9 @@ export interface VoiceNoteMeta {
   transcript?: string;
   tags?: string[];
   audioSize?: number;
+  category?: NoteCategory; // 'journal' | 'meeting' | 'idea' | 'note'
+  attendees?: string[]; // for meetings
+  summary?: string; // key bullet points / takeaways
 }
 
 export interface VoiceNote extends VoiceNoteMeta {
