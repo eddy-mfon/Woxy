@@ -137,7 +137,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
               <div className="onboarding-input-row">
                 <input
                   type="text"
-                  placeholder="e.g. Eddy, Alex, Maya..."
+                  placeholder=""
                   value={inputName}
                   onChange={(e) => setInputName(e.target.value)}
                   className="onboarding-name-input"

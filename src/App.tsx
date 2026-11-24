@@ -51,7 +51,7 @@ export function App() {
   const [_loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [userName, setUserName] = useState(
-    () => localStorage.getItem('vj_user_name') || 'Eddy'
+    () => localStorage.getItem('vj_user_name') || ''
   );
   const [journalName, setJournalName] = useState(
     () => localStorage.getItem('vj_journal_name') || 'Voice Journal'
@@ -326,6 +326,7 @@ export function App() {
     return notes.filter((n) => n.dateStr === openedDayStudioDate);
   }, [notes, openedDayStudioDate]);
 
+  const journeyDisplayName = userName.trim() ? `${userName}’s Journey` : 'My Journey';
   const userEmail = `${userName.toLowerCase().replace(/[^a-z0-9]/g, '') || 'user'}@voicejournal.app`;
 
   return (
@@ -500,7 +501,7 @@ export function App() {
                   {/* Center: Journey Title, Status Message */}
                   <div className="hero-meta-center">
                     <div className="hero-title-badge-row">
-                      <h2 className="hero-journey-title">{userName}’s Journey</h2>
+                      <h2 className="hero-journey-title">{journeyDisplayName}</h2>
                     </div>
 
                     {/* Status message with yellow lightning bolt Zap icon */}
@@ -522,7 +523,17 @@ export function App() {
 
                 {/* Bottom 4 Stat Tickers Row */}
                 <div className="hero-tickers-grid">
-                  <div className="ticker-col">
+                  <div
+                    className="ticker-col is-clickable"
+                    onClick={() => {
+                      // Scroll smoothly to today's recorder / calendar
+                      const el = document.getElementById('audio-recorder-chamber');
+                      if (el) el.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    role="button"
+                    tabIndex={0}
+                    title="Click to record today's note and build your streak"
+                  >
                     <span className="ticker-label-text">CURRENT STREAK</span>
                     <div className="ticker-metric-row">
                       <Flame size={16} className="metric-icon-flame" />
@@ -533,7 +544,16 @@ export function App() {
                     </div>
                   </div>
 
-                  <div className="ticker-col">
+                  <div
+                    className="ticker-col is-clickable"
+                    onClick={() => {
+                      setActivePage('calendar');
+                      setOpenedDayStudioDate(null);
+                    }}
+                    role="button"
+                    tabIndex={0}
+                    title="Click to view full calendar & journal history"
+                  >
                     <span className="ticker-label-text">DAYS JOURNALED</span>
                     <div className="ticker-metric-row">
                       <Calendar size={15} className="metric-icon-calendar" />
@@ -542,7 +562,16 @@ export function App() {
                     </div>
                   </div>
 
-                  <div className="ticker-col">
+                  <div
+                    className="ticker-col is-clickable"
+                    onClick={() => {
+                      setActivePage('calendar');
+                      setOpenedDayStudioDate(null);
+                    }}
+                    role="button"
+                    tabIndex={0}
+                    title="Click to browse all your voice notes across days"
+                  >
                     <span className="ticker-label-text">TOTAL AUDIO NOTES</span>
                     <div className="ticker-metric-row">
                       <Mic size={15} className="metric-icon-mic" />
@@ -551,7 +580,16 @@ export function App() {
                     </div>
                   </div>
 
-                  <div className="ticker-col">
+                  <div
+                    className="ticker-col is-clickable"
+                    onClick={() => {
+                      setActivePage('calendar');
+                      setOpenedDayStudioDate(null);
+                    }}
+                    role="button"
+                    tabIndex={0}
+                    title="Click to see daily listening time breakdown"
+                  >
                     <span className="ticker-label-text">LISTENING TIME</span>
                     <div className="ticker-metric-row">
                       <Clock size={15} className="metric-icon-clock" />

@@ -727,11 +727,21 @@ html, body, #root {
   transition: all 0.18s ease;
 }
 
-.ticker-col:hover {
+.ticker-col.is-clickable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.ticker-col:hover,
+.ticker-col.is-clickable:hover {
   background-color: #ffffff;
   border-color: var(--accent-purple-light);
-  box-shadow: var(--shadow-sm);
-  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--accent-purple-glow);
+  transform: translateY(-2px);
+}
+
+.ticker-col.is-clickable:active {
+  transform: translateY(0);
 }
 
 .ticker-label-text {
