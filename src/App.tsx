@@ -230,6 +230,11 @@ export function App() {
     await refreshNotes();
   };
 
+  const handleUpdateTranscript = async (id: string, newTranscript: string) => {
+    await updateVoiceNote(id, { transcript: newTranscript });
+    await refreshNotes();
+  };
+
   const handleExportBackup = async () => {
     try {
       const json = await exportJournalBackup();
@@ -592,6 +597,7 @@ export function App() {
                         authorName={userName}
                         onDelete={handleDeleteRecord}
                         onUpdateTitle={handleUpdateTitle}
+                        onUpdateTranscript={handleUpdateTranscript}
                       />
                     ))}
                   </div>
@@ -611,6 +617,7 @@ export function App() {
                   onSaveRecord={handleSaveRecord}
                   onDeleteRecord={handleDeleteRecord}
                   onUpdateTitle={handleUpdateTitle}
+                  onUpdateTranscript={handleUpdateTranscript}
                 />
               ) : (
                 <div className="calendar-view-container">

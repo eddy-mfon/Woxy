@@ -12,6 +12,7 @@ interface DayDetailStudioProps {
   onSaveRecord: (blob: Blob, duration: number, title?: string) => Promise<void>;
   onDeleteRecord: (id: string) => Promise<void>;
   onUpdateTitle: (id: string, newTitle: string) => Promise<void>;
+  onUpdateTranscript?: (id: string, transcript: string) => Promise<void>;
 }
 
 export const DayDetailStudio: React.FC<DayDetailStudioProps> = ({
@@ -21,6 +22,7 @@ export const DayDetailStudio: React.FC<DayDetailStudioProps> = ({
   onSaveRecord,
   onDeleteRecord,
   onUpdateTitle,
+  onUpdateTranscript,
 }) => {
   const [showRecorder, setShowRecorder] = React.useState(notes.length === 0);
 
@@ -110,6 +112,7 @@ export const DayDetailStudio: React.FC<DayDetailStudioProps> = ({
                 note={note}
                 onDelete={onDeleteRecord}
                 onUpdateTitle={onUpdateTitle}
+                onUpdateTranscript={onUpdateTranscript}
               />
             ))}
           </div>

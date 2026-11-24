@@ -21,7 +21,7 @@ export function getTranscriptionSettings(): TranscriptionSettings {
     console.error('Failed to load transcription settings:', e);
   }
   return {
-    preferredProvider: 'browser',
+    preferredProvider: 'groq',
     autoTranscribeOnSave: false,
     groqModel: 'whisper-large-v3-turbo',
   };
@@ -60,18 +60,30 @@ export async function transcribeWithGroq(
     throw new Error('Groq API Key is missing. Please add it in Settings.');
   }
 
+  if (typeof navigator !== 'undefined' && !navigator.onLine) {
+    throw new Error('You are currently offline. Cloud AI transcription requires an internet connection.');
+  }
+
   const formData = new FormData();
   formData.append('file', audioBlob, 'journal-entry.webm');
   formData.append('model', model);
   formData.append('response_format', 'json');
 
-  const response = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${apiKey.trim()}`,
-    },
-    body: formData,
-  });
+  let response: Response;
+  try {
+    response = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey.trim()}`,
+      },
+      body: formData,
+    });
+  } catch (err: unknown) {
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      throw new Error('You are currently offline. Connect to the internet to transcribe audio with Groq Whisper.');
+    }
+    throw new Error(`Failed to reach Groq server: ${err instanceof Error ? err.message : String(err)}`);
+  }
 
   if (!response.ok) {
     let errDetail = response.statusText;
@@ -96,6 +108,10 @@ export async function transcribeWithGroq(
 export async function transcribeWithGemini(audioBlob: Blob, apiKey: string): Promise<string> {
   if (!apiKey || !apiKey.trim()) {
     throw new Error('Gemini API Key is missing. Please add it in Settings.');
+  }
+
+  if (typeof navigator !== 'undefined' && !navigator.onLine) {
+    throw new Error('You are currently offline. Cloud AI transcription requires an internet connection.');
   }
 
   // Convert audio blob to base64
@@ -128,17 +144,25 @@ export async function transcribeWithGemini(audioBlob: Blob, apiKey: string): Pro
     ],
   };
 
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`,
-    {
-      method: 'POST',
-      headers: {
-        'x-goog-api-key': apiKey.trim(),
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
+  let response: Response;
+  try {
+    response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`,
+      {
+        method: 'POST',
+        headers: {
+          'x-goog-api-key': apiKey.trim(),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      }
+    );
+  } catch (err: unknown) {
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      throw new Error('You are currently offline. Connect to the internet to transcribe audio with Gemini.');
     }
-  );
+    throw new Error(`Failed to reach Gemini API: ${err instanceof Error ? err.message : String(err)}`);
+  }
 
   if (!response.ok) {
     let errDetail = response.statusText;
@@ -166,18 +190,30 @@ export async function transcribeWithOpenAI(audioBlob: Blob, apiKey: string): Pro
     throw new Error('OpenAI API Key is missing. Please add it in Settings.');
   }
 
+  if (typeof navigator !== 'undefined' && !navigator.onLine) {
+    throw new Error('You are currently offline. Cloud AI transcription requires an internet connection.');
+  }
+
   const formData = new FormData();
   formData.append('file', audioBlob, 'journal-entry.webm');
   formData.append('model', 'whisper-1');
   formData.append('response_format', 'json');
 
-  const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${apiKey.trim()}`,
-    },
-    body: formData,
-  });
+  let response: Response;
+  try {
+    response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey.trim()}`,
+      },
+      body: formData,
+    });
+  } catch (err: unknown) {
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      throw new Error('You are currently offline. Connect to the internet to transcribe audio with OpenAI.');
+    }
+    throw new Error(`Failed to reach OpenAI server: ${err instanceof Error ? err.message : String(err)}`);
+  }
 
   if (!response.ok) {
     let errDetail = response.statusText;

@@ -4002,3 +4002,491 @@ html, body, #root {
   margin-left: 0.2rem;
   color: var(--accent-purple);
 }
+
+
+/* =========================================================
+   TRANSCRIBE MODAL & OFFLINE STYLING
+   ========================================================= */
+
+.transcribe-modal-card {
+  max-width: 600px;
+  width: 100%;
+}
+
+.transcribe-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.transcribe-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.transcribe-icon-wrap {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background-color: var(--accent-purple-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-purple);
+  flex-shrink: 0;
+}
+
+.transcribe-modal-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-pure);
+}
+
+.transcribe-modal-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 0.15rem;
+}
+
+.transcribe-close-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.35rem;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.transcribe-close-btn:hover {
+  background-color: var(--bg-surface-subtle);
+  color: var(--text-pure);
+}
+
+.transcribe-modal-body {
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.transcribe-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius-md);
+  font-size: 0.83rem;
+  line-height: 1.45;
+}
+
+.transcribe-alert.error {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+
+.transcribe-alert.offline {
+  background-color: #f8fafc;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+}
+
+.alert-text-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.alert-link-btn {
+  background: none;
+  border: none;
+  color: var(--accent-purple);
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 0.82rem;
+  text-align: left;
+  padding: 0;
+  font-weight: 600;
+}
+
+.transcribe-engine-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.selector-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.engine-options-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+@media (max-width: 600px) {
+  .engine-options-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.engine-pill-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background-color: #ffffff;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.engine-pill-btn:hover {
+  border-color: var(--border-strong);
+  background-color: var(--bg-surface-subtle);
+}
+
+.engine-pill-btn.is-selected {
+  border-color: var(--accent-purple);
+  background-color: var(--accent-purple-bg);
+  color: var(--accent-purple);
+  box-shadow: 0 0 0 1.5px var(--accent-purple);
+}
+
+.pill-badge {
+  font-size: 0.68rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 9999px;
+  font-weight: 700;
+}
+
+.pill-badge.free {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+.quick-api-config-box {
+  background-color: var(--bg-surface-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.config-box-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.config-box-title {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-pure);
+}
+
+.btn-toggle-config {
+  background: none;
+  border: none;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.config-box-explainer {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.config-external-link {
+  color: var(--accent-purple);
+  text-decoration: underline;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.config-input-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.2rem;
+}
+
+.config-key-input {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  background-color: #ffffff;
+  font-size: 0.82rem;
+  color: var(--text-pure);
+  outline: none;
+}
+
+.config-key-input:focus {
+  border-color: var(--accent-purple);
+}
+
+.config-save-btn {
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-sm);
+  border: none;
+  background-color: var(--accent-purple);
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.config-save-btn:hover {
+  opacity: 0.9;
+}
+
+.transcript-box-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.transcript-box-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.transcript-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.transcript-actions-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-transcript-action {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  background-color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-transcript-action:hover {
+  background-color: var(--bg-surface-subtle);
+  color: var(--text-pure);
+}
+
+.transcript-textarea {
+  width: 100%;
+  padding: 0.85rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background-color: #ffffff;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--text-pure);
+  resize: vertical;
+  min-height: 150px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.transcript-textarea:focus {
+  border-color: var(--accent-purple);
+  box-shadow: 0 0 0 2px var(--accent-purple-bg);
+}
+
+.transcribe-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.btn-transcribe-cancel {
+  padding: 0.55rem 1.15rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background-color: #ffffff;
+  color: var(--text-secondary);
+  font-size: 0.84rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.btn-transcribe-cancel:hover {
+  background-color: var(--bg-surface-subtle);
+}
+
+.btn-transcribe-primary {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 1.35rem;
+  border-radius: var(--radius-md);
+  border: none;
+  background-color: var(--accent-purple);
+  color: #ffffff;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.btn-transcribe-primary:hover:not(:disabled) {
+  background-color: var(--accent-purple-hover);
+}
+
+.btn-transcribe-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-transcribe-primary.disabled-offline {
+  background-color: #94a3b8;
+}
+
+.transcribe-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Voice Note Card Transcribe additions */
+.vnc-quick-transcribe-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  background-color: #ffffff;
+  color: var(--text-muted);
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.vnc-quick-transcribe-btn:hover {
+  border-color: var(--accent-purple);
+  color: var(--accent-purple);
+  background-color: var(--accent-purple-bg);
+}
+
+.vnc-quick-transcribe-btn.has-transcript {
+  background-color: var(--accent-purple-bg);
+  border-color: var(--accent-purple-light);
+  color: var(--accent-purple);
+}
+
+.vnc-transcript-preview-box {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  border-radius: var(--radius-md);
+  background-color: var(--bg-surface-subtle);
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.vnc-transcript-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+}
+
+.vnc-transcript-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.vnc-transcript-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+}
+
+.vnc-transcript-toggle-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 0;
+}
+
+.vnc-transcript-text {
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.vnc-transcript-text.collapsed {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.vnc-transcript-text.expanded {
+  display: block;
+}

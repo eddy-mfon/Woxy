@@ -52,12 +52,17 @@ class RootErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState
   }
 }
 
-// Unregister any active service worker in development to avoid caching blank or stale states
+// Register service worker for offline desktop PWA support
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then((registrations) => {
-    for (const reg of registrations) {
-      reg.unregister();
-    }
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register('/sw.js')
+      .then((registration) => {
+        console.log('[SW] ServiceWorker registered successfully with scope:', registration.scope);
+      })
+      .catch((error) => {
+        console.warn('[SW] ServiceWorker registration failed:', error);
+      });
   });
 }
 

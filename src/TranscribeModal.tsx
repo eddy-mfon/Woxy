@@ -10,6 +10,7 @@ import {
   Copy,
   Volume2,
   X,
+  WifiOff,
 } from 'lucide-react';
 import {
   getTranscriptionSettings,
@@ -46,7 +47,24 @@ export const TranscribeModal: React.FC<TranscribeModalProps> = ({
   const [selectedProvider, setSelectedProvider] = useState<TranscriptionProvider>('groq');
   const [groqKeyInput, setGroqKeyInput] = useState('');
   const [geminiKeyInput, setGeminiKeyInput] = useState('');
+  const [openaiKeyInput, setOpenaiKeyInput] = useState('');
   const [showConfig, setShowConfig] = useState(false);
+  const [isOnline, setIsOnline] = useState(() =>
+    typeof navigator !== 'undefined' ? navigator.onLine : true
+  );
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -58,6 +76,7 @@ export const TranscribeModal: React.FC<TranscribeModalProps> = ({
       setSelectedProvider(s.preferredProvider === 'browser' ? 'groq' : s.preferredProvider);
       setGroqKeyInput(s.groqApiKey || '');
       setGeminiKeyInput(s.geminiApiKey || '');
+      setOpenaiKeyInput(s.openaiApiKey || '');
 
       // If no keys configured, show config accordion
       if (!s.groqApiKey && !s.geminiApiKey && !s.openaiApiKey) {
@@ -74,11 +93,18 @@ export const TranscribeModal: React.FC<TranscribeModalProps> = ({
       return;
     }
 
+    if (!isOnline) {
+      setError('You are offline. Your audio note is safely stored locally on your device! Cloud AI transcription will be ready once you reconnect to the internet.');
+      return;
+    }
+
     // Save key if entered right here
     if (selectedProvider === 'groq' && groqKeyInput.trim()) {
       saveTranscriptionSettings({ groqApiKey: groqKeyInput.trim(), preferredProvider: 'groq' });
     } else if (selectedProvider === 'gemini' && geminiKeyInput.trim()) {
       saveTranscriptionSettings({ geminiApiKey: geminiKeyInput.trim(), preferredProvider: 'gemini' });
+    } else if (selectedProvider === 'openai' && openaiKeyInput.trim()) {
+      saveTranscriptionSettings({ openaiApiKey: openaiKeyInput.trim(), preferredProvider: 'openai' });
     }
 
     setIsTranscribing(true);
@@ -120,7 +146,7 @@ export const TranscribeModal: React.FC<TranscribeModalProps> = ({
   const hasKeyForSelected =
     (selectedProvider === 'groq' && (currentSettings.groqApiKey || groqKeyInput.trim())) ||
     (selectedProvider === 'gemini' && (currentSettings.geminiApiKey || geminiKeyInput.trim())) ||
-    (selectedProvider === 'openai' && currentSettings.openaiApiKey);
+    (selectedProvider === 'openai' && (currentSettings.openaiApiKey || openaiKeyInput.trim()));
 
   return (
     <div className="vj-modal-overlay" onClick={onClose}>
@@ -148,6 +174,19 @@ export const TranscribeModal: React.FC<TranscribeModalProps> = ({
 
         {/* Modal Body */}
         <div className="transcribe-modal-body">
+          {/* Offline Status Notice Banner */}
+          {!isOnline && (
+            <div className="transcribe-alert offline">
+              <WifiOff size={16} />
+              <div className="alert-text-wrap">
+                <strong>You are currently offline</strong>
+                <span>
+                  Your voice note is saved locally on your computer and can be played anytime. AI transcription requires an active internet connection to contact Groq, Gemini, or OpenAI Whisper.
+                </span>
+              </div>
+            </div>
+          )}
+
           {error && (
             <div className="transcribe-alert error">
               <AlertCircle size={16} />
@@ -297,6 +336,29 @@ export const TranscribeModal: React.FC<TranscribeModalProps> = ({
                   </button>
                 </div>
               )}
+
+              {selectedProvider === 'openai' && (
+                <div className="config-input-row">
+                  <input
+                    type="password"
+                    placeholder="Enter OpenAI API Key (sk-...)"
+                    value={openaiKeyInput}
+                    onChange={(e) => setOpenaiKeyInput(e.target.value)}
+                    className="config-key-input"
+                  />
+                  <button
+                    type="button"
+                    className="config-save-btn"
+                    onClick={() => {
+                      saveTranscriptionSettings({ openaiApiKey: openaiKeyInput.trim() });
+                      alert('OpenAI API Key saved locally!');
+                      setShowConfig(false);
+                    }}
+                  >
+                    Save
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
@@ -335,6 +397,8 @@ export const TranscribeModal: React.FC<TranscribeModalProps> = ({
               placeholder={
                 isTranscribing
                   ? 'Transcribing audio reflection... Please wait a few seconds.'
+                  : !isOnline
+                  ? 'You are offline. When connected to the internet, tap "Transcribe This Recording" to generate a transcript, or type notes manually right here.'
                   : 'Click "Start Transcription" below to transcribe your voice journal into text, or type notes here.'
               }
               value={transcript}
@@ -358,14 +422,20 @@ export const TranscribeModal: React.FC<TranscribeModalProps> = ({
 
           <button
             type="button"
-            className={`btn-transcribe-primary ${isTranscribing ? 'loading' : ''}`}
+            className={`btn-transcribe-primary ${isTranscribing ? 'loading' : ''} ${!isOnline ? 'disabled-offline' : ''}`}
             onClick={handleTranscribe}
-            disabled={isTranscribing || !audioBlob}
+            disabled={isTranscribing || !audioBlob || !isOnline}
+            title={!isOnline ? 'Connect to the internet to transcribe' : undefined}
           >
             {isTranscribing ? (
               <>
                 <span className="transcribe-spinner" />
                 <span>Transcribing with {selectedProvider.toUpperCase()}...</span>
+              </>
+            ) : !isOnline ? (
+              <>
+                <WifiOff size={16} />
+                <span>Offline (Cloud AI Paused)</span>
               </>
             ) : (
               <>
