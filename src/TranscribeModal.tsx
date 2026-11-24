@@ -167,6 +167,7 @@ export const TranscribeModal: React.FC<TranscribeModalProps> = ({
               </p>
             </div>
           </div>
+          <span className="transcribe-header-badge">Coming Soon</span>
           <button className="transcribe-close-btn" onClick={onClose} title="Close">
             <X size={18} />
           </button>
@@ -174,6 +175,17 @@ export const TranscribeModal: React.FC<TranscribeModalProps> = ({
 
         {/* Modal Body */}
         <div className="transcribe-modal-body">
+          {/* Coming Soon Notice Banner */}
+          <div className="transcribe-alert coming-soon">
+            <Sparkles size={18} className="text-accent" />
+            <div className="alert-text-wrap">
+              <strong>Voice-to-Text is Coming Very Soon!</strong>
+              <span>
+                Automatic AI transcription is currently being prepared and will launch shortly once our API keys and models are finalized. You can already type, review, and save your personal notes or transcripts manually below!
+              </span>
+            </div>
+          </div>
+
           {/* Offline Status Notice Banner */}
           {!isOnline && (
             <div className="transcribe-alert offline">
@@ -392,14 +404,12 @@ export const TranscribeModal: React.FC<TranscribeModalProps> = ({
               </div>
             </div>
 
-            <textarea
+              <textarea
               className="transcript-textarea"
               placeholder={
                 isTranscribing
                   ? 'Transcribing audio reflection... Please wait a few seconds.'
-                  : !isOnline
-                  ? 'You are offline. When connected to the internet, tap "Transcribe This Recording" to generate a transcript, or type notes manually right here.'
-                  : 'Click "Start Transcription" below to transcribe your voice journal into text, or type notes here.'
+                  : 'Automatic AI transcription is coming very soon! In the meantime, you can write or edit your voice reflection notes right here.'
               }
               value={transcript}
               onChange={(e) => setTranscript(e.target.value)}

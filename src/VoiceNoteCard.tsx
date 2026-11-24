@@ -266,10 +266,15 @@ export const VoiceNoteCard: React.FC<VoiceNoteCardProps> = ({
             type="button"
             className={`vnc-quick-transcribe-btn ${note.transcript ? 'has-transcript' : ''}`}
             onClick={handleOpenTranscribe}
-            title={note.transcript ? 'View Transcript' : 'Transcribe voice to text'}
+            title={note.transcript ? 'View Transcript' : 'Voice-to-Text Transcription (Coming Soon)'}
           >
-            <Sparkles size={13} />
-            <span>{note.transcript ? 'Transcript' : 'Transcribe'}</span>
+            <Sparkles size={14} className="vnc-transcribe-sparkle" />
+            <span className="vnc-transcribe-text">
+              {note.transcript ? 'Transcript' : 'Transcribe'}
+            </span>
+            {!note.transcript && (
+              <span className="vnc-soon-pill">Soon</span>
+            )}
           </button>
 
           <button
