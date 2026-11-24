@@ -1057,6 +1057,23 @@ export function App() {
         </div>
       </main>
 
+      {/* Floating Action Button (FAB) for instant note creation */}
+      <button
+        type="button"
+        className="minimalist-fab-record"
+        onClick={() => {
+          setActivePage('home');
+          setTimeout(() => {
+            const el = document.getElementById('audio-recorder-chamber');
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+          }, 50);
+        }}
+        title="Create new note / record"
+        aria-label="Create new note or record"
+      >
+        <Mic size={22} />
+      </button>
+
       {/* ================= MOBILE BOTTOM NAVIGATION ================= */}
       <nav className="mobile-bottom-nav" aria-label="Mobile Navigation">
         <button
@@ -1067,7 +1084,18 @@ export function App() {
           }}
         >
           <Home size={20} />
-          <span className="mobile-nav-text">Home</span>
+          <span className="mobile-nav-text">Notes</span>
+        </button>
+
+        <button
+          className={`mobile-nav-btn ${activePage === 'meetings' ? 'is-active' : ''}`}
+          onClick={() => {
+            setActivePage('meetings');
+            setOpenedDayStudioDate(null);
+          }}
+        >
+          <Users size={20} />
+          <span className="mobile-nav-text">Meetings</span>
         </button>
 
         <button
@@ -1079,14 +1107,6 @@ export function App() {
         >
           <CalendarIcon size={20} />
           <span className="mobile-nav-text">Calendar</span>
-        </button>
-
-        <button
-          className="mobile-nav-btn"
-          onClick={() => setIsOnboardingOpen(true)}
-        >
-          <HelpCircle size={20} />
-          <span className="mobile-nav-text">Guide</span>
         </button>
 
         <button
